@@ -1,4 +1,5 @@
 require('dotenv').config()
+const ShopListService = require('./shopping-list-service')
 const knex = require('knex')
 
 const knexInstance = knex({
@@ -62,4 +63,32 @@ function getCostByCategory() {
         })
 }
 
-getCostByCategory()
+/* ------- Shopping List Services ---------- */
+
+ShopListService.getAllItems(knexInstance)
+    .then(results => {
+        console.log(results)
+    })
+    .then(() =>
+        ShopListService.insertIntoList(knexInstance, {
+            name: 'Chocolate',
+            price: 40.44, 
+            category: 'Snack', 
+            checked: true, 
+            date_added: new Date('1919-12-22T16:28:32.615Z')
+        })
+    )
+    .then(newItem => {
+        console.log(newItem)
+        return ShopListService.updateListItem(
+            knexInstance, 
+            newItem.id, 
+            { name: 'New Food' }
+        ).then(() => ShopListService.getById(knexInstance, newItem.id))
+    })
+    .then(updatedItem => {
+        console.log(updatedItem)
+        return ShopListService.deleteListItem(knexInstance, updatedItem.id)
+    })
+
+// getCostByCategory()
